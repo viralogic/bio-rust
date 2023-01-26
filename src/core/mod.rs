@@ -1,2 +1,2 @@
 pub mod sequences;
-pub mod traits;
+pub mod language;
