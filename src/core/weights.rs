@@ -5,7 +5,7 @@ pub trait MolWt {
 }
 
 pub struct Weights {
-    residue_weights: HashMap<char, f64>,
+    pub residue_weights: HashMap<char, f64>,
     factor: f64
 }
 

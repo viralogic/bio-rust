@@ -9,9 +9,17 @@ pub struct Peptide<'a> {
 
 impl<'a> Peptide<'a> {
     pub fn new(sequence: &str) -> Peptide<'a> {
+        let seq = String::from(sequence).replace(" ", "").to_uppercase();
+        let alphabet = &*language::PEPTIDE;
+        let illegal_residues = seq.chars().any(
+            |c| !alphabet.weights.residue_weights.contains_key(&c)
+        );
+        if illegal_residues {
+            panic!("{} is not a valid peptide sequence", sequence);
+        }
         return Peptide {
-            sequence: String::from(sequence).replace(" ", "").to_uppercase(),
-            language: &*language::PEPTIDE
+            sequence: seq,
+            language: alphabet
         }
     }
     
@@ -24,14 +32,14 @@ impl<'a> Peptide<'a> {
     }
 }
 
-pub struct Nucleotide<'a, T: MolWt + Nucleoside> {
+pub struct Oligo<'a, T: MolWt + Nucleoside> {
     sequence: String,
     language: &'a T
 }
 
-impl<'a, T: MolWt + Nucleoside> Nucleotide<'a, T> {
-    pub fn new(sequence: &str, language: &'a T) -> Nucleotide<'a, T> {
-        return Nucleotide {
+impl<'a, T: MolWt + Nucleoside> Oligo<'a, T> {
+    pub fn new(sequence: &str, language: &'a T) -> Oligo<'a, T> {
+        return Oligo {
             sequence: String::from(sequence).replace(" ", "").to_uppercase(),
             language
         }
@@ -45,15 +53,15 @@ impl<'a, T: MolWt + Nucleoside> Nucleotide<'a, T> {
         return self.sequence.len();
     }
 
-    pub fn complement(&self) -> Nucleotide<'a, T> {
-        return Nucleotide {
+    pub fn complement(&self) -> Oligo<'a, T> {
+        return Oligo {
             sequence: self.language.complement(&self.sequence),
             language: self.language
         }
     }
 
-    pub fn reverse_complement(&self) -> Nucleotide<'a, T> {
-        return Nucleotide { 
+    pub fn reverse_complement(&self) -> Oligo<'a, T> {
+        return Oligo { 
             sequence: self.language.reverse_complement(&self.sequence),
             language: self.language
         }

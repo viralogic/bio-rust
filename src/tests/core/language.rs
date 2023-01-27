@@ -29,4 +29,4 @@ fn test_sequence_mol_wt(#[case] language: &dyn MolWt, #[case] sequence: &str, #[
 fn test_dna_reverse_complement(#[case] language: &dyn Nucleoside, #[case] sequence: &str, #[case] reverse_complement: &str) {
     assert_eq!(&*language.reverse_complement(sequence), reverse_complement);
 }
-
+  
