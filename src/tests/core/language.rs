@@ -1,4 +1,6 @@
+use crate::core::complement::Nucleoside;
 use crate::core::language;
+use crate::core::weights::MolWt;
 
 use rstest::rstest;
 
@@ -17,6 +19,14 @@ use rstest::rstest;
 #[case(&*language::PEPTIDE, "ARNDCEQGHILKMFPSTWYV", 2396.0)]
 #[case(&*language::PEPTIDE, "aRNDCEQGHILKMFPSTWYV", 2396.0)]
 #[case(&*language::PEPTIDE, "aRNDCEQGHIL    KMFPSTWYV", 2396.0)]
-fn test_sequence_mol_wt(#[case] language: &language::Language, #[case] sequence: &str, #[case] mol_wt: f64) {
-    assert_eq!(language.weights.mol_wt(sequence).round(), mol_wt);
+fn test_sequence_mol_wt(#[case] language: &dyn MolWt, #[case] sequence: &str, #[case] mol_wt: f64) {
+    assert_eq!(language.mol_wt(sequence).round(), mol_wt);
 }
+
+#[rstest]
+#[case(&*language::DNA, "ACCTGAG", "CTCAGGT")]
+#[case(&*language::RNA, "ACCUGAG", "CUCAGGU")]
+fn test_dna_reverse_complement(#[case] language: &dyn Nucleoside, #[case] sequence: &str, #[case] reverse_complement: &str) {
+    assert_eq!(&*language.reverse_complement(sequence), reverse_complement);
+}
+
