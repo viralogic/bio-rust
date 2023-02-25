@@ -1,6 +1,13 @@
+use std::io::Read;
+
 use crate::core::language;
 use crate::core::weights::MolWt;
 use crate::core::complement::Nucleoside;
+use crate::algorithms::translation::{
+    translate,
+    ReadingFrame
+};
+use strum::IntoEnumIterator;
 
 pub struct Peptide<'a> {
     sequence: String,
@@ -32,16 +39,16 @@ impl<'a> Peptide<'a> {
     }
 }
 
-pub struct Oligo<'a, T: MolWt + Nucleoside> {
+pub struct RNA<'a> {
     sequence: String,
-    language: &'a T
+    language: &'a language::Nucleoside<'a>
 }
 
-impl<'a, T: MolWt + Nucleoside> Oligo<'a, T> {
-    pub fn new(sequence: &str, language: &'a T) -> Oligo<'a, T> {
-        return Oligo {
+impl<'a> RNA<'a> {
+    pub fn new(sequence: &str) -> RNA<'a> {
+        return RNA {
             sequence: String::from(sequence).replace(" ", "").to_uppercase(),
-            language
+            language: &*language::RNA
         }
     }
 
@@ -53,18 +60,89 @@ impl<'a, T: MolWt + Nucleoside> Oligo<'a, T> {
         return self.sequence.len();
     }
 
-    pub fn complement(&self) -> Oligo<'a, T> {
-        return Oligo {
+    pub fn back_transcribe(&self) -> DNA {
+        return DNA {
+            sequence: String::from(&self.sequence.replace("U", "T")),
+            language: self.language
+        }
+    }
+
+    /**
+     * Provides translations of the RNA sequence for each of the 3 possible
+     * reading frames.
+     */
+    pub fn translate(&self) -> Vec<Peptide> {
+        let mut translations: Vec<Peptide> = Vec::new();
+
+        for frame in ReadingFrame::iter() {
+            let translated_sequence = translate(&self.sequence, &self.language.codon_table, Some(frame));
+            translations.push(Peptide::new(
+                &translated_sequence
+            ))
+        }
+        return translations;
+    }
+}
+
+
+pub struct DNA<'a> {
+    sequence: String,
+    language: &'a language::Nucleoside<'a>
+}
+
+impl<'a> DNA<'a> {
+    pub fn new(sequence: &str) -> DNA<'a> {
+        return DNA {
+            sequence: String::from(sequence).replace(" ", "").to_uppercase(),
+            language: &*language::DNA
+        }
+    }
+
+    pub fn mol_wt(&self) -> f64 {
+        return self.language.mol_wt(&self.sequence);
+    }
+
+    pub fn length(&self) -> usize {
+        return self.sequence.len();
+    }
+
+    pub fn complement(&self) -> DNA<'a> {
+        return DNA {
             sequence: self.language.complement(&self.sequence),
             language: self.language
         }
     }
 
-    pub fn reverse_complement(&self) -> Oligo<'a, T> {
-        return Oligo { 
+    pub fn reverse_complement(&self) -> DNA<'a> {
+        return DNA { 
             sequence: self.language.reverse_complement(&self.sequence),
             language: self.language
         }
     }
-}
 
+    pub fn transcribe(&self) -> RNA {
+        return RNA {
+            sequence: String::from(&self.sequence.replace("T", "U")),
+            language: self.language
+        }
+    }
+
+    pub fn translate(&self) -> Vec<Peptide> {
+        let mut translations: Vec<Peptide> = Vec::new();
+        for frame in ReadingFrame::iter() {
+            let translation: String = translate(
+                &self.sequence, &self.language.codon_table, Some(frame)
+            );
+            translations.push(Peptide::new(&translation));
+        }
+
+        let complement = self.complement().sequence;
+        for frame in ReadingFrame::iter() {
+            let translation: String = translate(
+                &complement, &self.language.codon_table, Some(frame)
+            );
+            translations.push(Peptide::new(&translation));
+        }
+        return translations;
+    }
+}

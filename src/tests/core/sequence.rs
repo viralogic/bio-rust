@@ -1,8 +1,8 @@
 use crate::core::sequences::{
-    Oligo,
+    DNA,
+    RNA,
     Peptide
 };
-use crate::core::language;
 use rstest::rstest;
 
 #[rstest]
@@ -10,23 +10,24 @@ use rstest::rstest;
 #[case("GGGGGGG", 7)]
 #[case("ATC GAT CGT", 9)]
 #[case("aaaAAAAaaATC GAT CGT", 18)]
-#[case("AUC GAU CGU", 9)]
 #[case("", 0)]
-fn test_oligo_sequence_length(#[case] sequence: &str, #[case] length: usize) {
-    let sequence = Oligo::new(sequence, &*language::DNA);
+fn test_dna_sequence_length(#[case] sequence: &str, #[case] length: usize) {
+    let sequence = DNA::new(sequence);
     assert_eq!(sequence.length(), length);
 }
 
 #[rstest]
 #[case("ARNDCEQGHILKMFPSTWYV")]
+#[case("AUC GAU CGU")]
 fn test_dna_sequence_should_panic(#[case] sequence: &str) {
-    Oligo::new(sequence, &*language::DNA);
+    DNA::new(sequence);
 }
 
 #[rstest]
 #[case("ARNDCEQGHILKMFPSTWYV")]
+#[case("ATC GAT CGT")]
 fn test_rna_sequence_should_panic(#[case] sequence: &str) {
-    Oligo::new(sequence, &*language::RNA);
+    RNA::new(sequence);
 }
 
 #[rstest]
@@ -42,6 +43,7 @@ fn test_peptide_sequence_length(#[case] sequence: &str, #[case] length: usize) {
 #[rstest]
 #[should_panic]
 #[case("ccccccccccU")]
+#[case("ccccccccccT")]
 fn test_peptide_seqquence_panic(#[case] sequence: &str) {
     Peptide::new(sequence);
 }
