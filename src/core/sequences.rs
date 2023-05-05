@@ -1,5 +1,3 @@
-use std::io::Read;
-
 use crate::core::language;
 use crate::core::weights::MolWt;
 use crate::core::complement::Nucleoside;
@@ -36,6 +34,16 @@ impl<'a> Peptide<'a> {
 
     pub fn length(&self) -> usize {
         return self.sequence.len();
+    }
+}
+
+impl<'a> PartialEq for Peptide<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        return self.sequence == other.sequence;
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        return self.sequence != other.sequence;
     }
 }
 

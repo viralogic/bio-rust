@@ -31,6 +31,22 @@ fn test_rna_sequence_should_panic(#[case] sequence: &str) {
 }
 
 #[rstest]
+#[case(
+    RNA::new("GUCAUGGCCAUUGUAAUGGGCCGCUGAAAGGGUGCCCGAUAGUUG"),
+    vec![Peptide::new("VMAIVMGR<KGAR<L"), Peptide::new("SWPL<WAAERVPDS"), Peptide::new("HGHCNGPLKGCPIV")]
+)]
+#[case(
+    RNA::new("AUGUACUCGAUAGGCUGUAGCGAGUAG"),
+    vec![Peptide::new("MYSIGCSE<"), Peptide::new("CTR<AVAS"), Peptide::new("VLDRL<RV")]
+)]
+#[case(RNA::new(""), vec![Peptide::new(""), Peptide::new("")])]
+fn test_rna_translate(#[case] sequence: RNA, #[case] expected: Vec<Peptide>) {
+    for peptide in expected.iter() {
+        assert!(sequence.translate().contains(peptide));
+    }
+}
+
+#[rstest]
 #[case("", 0)]
 #[case("ARNDCEQGHILKMFPSTWYV", 20)]
 #[case("aRNDCEQ GHILKMFP", 15)]
@@ -47,4 +63,3 @@ fn test_peptide_sequence_length(#[case] sequence: &str, #[case] length: usize) {
 fn test_peptide_seqquence_panic(#[case] sequence: &str) {
     Peptide::new(sequence);
 }
-

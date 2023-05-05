@@ -12,7 +12,7 @@ pub enum ReadingFrame {
 /**
  * Translates a given sequence for a given reading frame using the given codon table.
  * 
- * Returns a String of the translated polypeptide sequence
+ * Returns a Vector of Strings of possible translated sequences based on reading frame
  */
 pub fn translate<'a>(sequence: &'a str, codon_table: &HashMap<&'a str, char>, reading_frame: Option<ReadingFrame>) -> String {
     let frame: ReadingFrame = reading_frame.unwrap_or(ReadingFrame::One);
